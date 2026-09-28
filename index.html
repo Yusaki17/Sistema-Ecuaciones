@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Factorización LU - Balanceo de Carga</title>
+  <title>Métodos Numéricos · Sistemas Lineales</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
     :root {
@@ -67,14 +70,47 @@
       margin-top: 0.5rem;
     }
 
+    .method-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(6, 182, 212, 0.1);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
     .method-panel {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 2rem;
       position: relative;
-      margin-bottom: 2rem;
+      display: none;
     }
+
+    .method-panel.active { display: block; }
+
     .method-panel::before {
       content: '';
       position: absolute;
@@ -102,6 +138,7 @@
       font-size: 0.9rem;
       line-height: 1.7;
     }
+
     .problem-info code {
       background: rgba(0,0,0,0.3);
       padding: 0.2rem 0.5rem;
@@ -117,9 +154,17 @@
       gap: 2rem;
       align-items: start;
     }
-    @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
 
-    .input-stack { display: flex; flex-direction: column; gap: 1.25rem; }
+    @media (max-width: 1024px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    .input-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
     .field label {
       display: block;
       font-family: var(--font-mono);
@@ -128,6 +173,7 @@
       margin-bottom: 0.4rem;
       text-transform: uppercase;
     }
+
     .field input, .field textarea {
       width: 100%;
       background: var(--bg-input);
@@ -139,17 +185,25 @@
       font-size: 0.9rem;
       transition: all 0.2s;
     }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
     .field input:focus, .field textarea:focus {
       outline: none;
       border-color: var(--accent-primary);
       box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
     }
-    .field textarea {
-      min-height: 100px;
-      resize: vertical;
+
+    .actions {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
     }
 
-    .actions { margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem; }
     .btn {
       width: 100%;
       padding: 0.85rem;
@@ -165,25 +219,125 @@
       justify-content: center;
       gap: 0.5rem;
     }
+
     .btn-primary { background: var(--accent-primary); color: #000; }
     .btn-primary:hover { background: #22d3ee; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3); }
-    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
-    .btn-ghost:hover { border-color: var(--text-muted); color: var(--text-main); background: rgba(255,255,255,0.03); }
+    
     .btn-secondary { background: var(--accent-secondary); color: #fff; }
     .btn-secondary:hover { background: #7c3aed; transform: translateY(-1px); }
 
-    .results-section { display: flex; flex-direction: column; gap: 2rem; animation: fadeIn 0.5s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--text-muted); color: var(--text-main); background: rgba(255,255,255,0.03); }
 
-    .result-card {
+    .results-section {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    th {
+      background: #1f2937;
+      color: var(--text-muted);
+      text-align: right;
+      padding: 0.75rem 1rem;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    th:first-child { text-align: center; }
+
+    td {
+      padding: 0.6rem 1rem;
+      text-align: right;
+      border-bottom: 1px solid #1f2937;
+      color: #d1d5db;
+    }
+    td:first-child { text-align: center; color: var(--text-muted); }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .convergence-row td {
+      color: var(--accent-success);
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      border-top: 2px solid var(--accent-success);
+      border-bottom: 2px solid var(--accent-success);
+    }
+
+    .post-convergence-row td {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .status-bar.success { background: rgba(16, 185, 129, 0.1); color: var(--accent-success); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .status-bar.error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .status-bar.hidden { display: none; }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+
+    .chart-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      height: 350px;
+    }
+
+    .conclusion-panel, .result-card, .step-box {
       background: rgba(6, 182, 212, 0.05);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 1.5rem;
       margin-bottom: 1rem;
     }
+    
+    .step-box {
+      background: rgba(139, 92, 246, 0.05);
+      border-left: 3px solid var(--accent-secondary);
+      border-radius: 0 6px 6px 0;
+    }
 
-    .result-card h3 {
+    .conclusion-panel h3, .result-card h3, .step-box h4 {
       color: var(--accent-primary);
       font-size: 1.1rem;
       margin-bottom: 1rem;
@@ -191,6 +345,7 @@
       align-items: center;
       gap: 0.5rem;
     }
+    .step-box h4 { color: var(--accent-secondary); }
 
     .result-item {
       display: flex;
@@ -211,6 +366,7 @@
       display: grid;
       gap: 1rem;
       margin: 1rem 0;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
     .matrix-box {
       background: rgba(0,0,0,0.3);
@@ -242,25 +398,6 @@
       font-weight: 600;
     }
 
-    .step-box {
-      background: rgba(139, 92, 246, 0.05);
-      border-left: 3px solid var(--accent-secondary);
-      padding: 1rem 1.5rem;
-      border-radius: 0 6px 6px 0;
-      margin: 1rem 0;
-    }
-    .step-box h4 {
-      color: var(--accent-secondary);
-      margin-bottom: 0.5rem;
-      font-size: 0.95rem;
-    }
-    .step-box p {
-      color: #d1d5db;
-      line-height: 1.7;
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-    }
-
     .formula-box {
       background: rgba(0,0,0,0.3);
       border: 1px solid var(--border);
@@ -276,17 +413,36 @@
 
     .hidden { display: none !important; }
 
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-right: 0.5rem;
+    .iter-count {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      color: var(--accent-primary);
+      font-size: 0.8rem;
     }
-    .badge-primary { background: rgba(6, 182, 212, 0.2); color: var(--accent-primary); }
-    .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--accent-success); }
-    .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--accent-warning); }
+
+    .convergence-info {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--accent-success);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent-success);
+    }
+    .convergence-info.hidden { display: none; }
+
+    .diagonal-dominant {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--accent-success);
+      border-radius: 6px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    .diagonal-dominant h4 { color: var(--accent-success); margin-bottom: 0.5rem; }
+    .diagonal-dominant ul { list-style: none; padding-left: 0; }
+    .diagonal-dominant li { padding: 0.3rem 0; color: #d1d5db; font-size: 0.9rem; }
+    .diagonal-dominant li::before { content: '✓ '; color: var(--accent-success); font-weight: bold; }
 
     .vector-display {
       display: flex;
@@ -309,10 +465,7 @@
       padding: 1.5rem;
       margin-top: 1rem;
     }
-    .solution-box h3 {
-      color: var(--accent-success);
-      margin-bottom: 1rem;
-    }
+    .solution-box h3 { color: var(--accent-success); margin-bottom: 1rem; }
 
     .comparison-grid {
       display: grid;
@@ -323,6 +476,75 @@
     @media (max-width: 768px) {
       .comparison-grid { grid-template-columns: 1fr; }
     }
+
+    .entregables-section {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 2px solid var(--border);
+    }
+    .entregables-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-warning);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .entregables-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 1024px) { .entregables-grid { grid-template-columns: 1fr; } }
+    
+    .entregable-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+    .entregable-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .entregable-card h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 1rem 0 0.5rem 0;
+    }
+    .entregable-card p, .entregable-card li {
+      color: #d1d5db;
+      line-height: 1.7;
+      font-size: 0.9rem;
+    }
+    .entregable-card ul { list-style: none; padding-left: 0; }
+    .entregable-card ul li { padding: 0.3rem 0; padding-left: 1.5rem; position: relative; }
+    .entregable-card ul li::before { content: '→'; position: absolute; left: 0; color: var(--accent-primary); }
+
+    .code-screenshot {
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #10b981;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .code-screenshot .line { padding: 0.2rem 0; }
+    .code-screenshot .keyword { color: #8b5cf6; }
+    .code-screenshot .function { color: #06b6d4; }
+    .code-screenshot .comment { color: #6b7280; font-style: italic; }
   </style>
 </head>
 <body>
@@ -330,27 +552,137 @@
 <div class="container">
   <header>
     <div>
-      <h1>FACTORIZACIÓN LU</h1>
-      <div class="subtitle">Balanceo de Carga · Clusters de Servidores · Método de Doolittle</div>
+      <h1>MÉTODOS NUMÉRICOS</h1>
+      <div class="subtitle">Sistemas Lineales · Jacobi · Factorización LU</div>
     </div>
-    <div style="font-family: var(--font-mono); color: var(--accent-primary); font-size: 0.8rem;">v1.0</div>
+    <div style="font-family: var(--font-mono); color: var(--accent-primary); font-size: 0.8rem;">v7.0</div>
   </header>
 
-  <!-- CONTEXTO DEL PROBLEMA -->
-  <div class="method-panel">
-    <div class="panel-title">📡 Contexto del Problema</div>
-    <div class="problem-info">
-      <p>Una empresa de infraestructura Cloud gestiona un clúster de <strong>N microservicios</strong> distribuidos. El rendimiento total depende de las latencias de procesamiento (xᵢ) de cada nodo. Se tiene el modelo lineal de dependencias interno:</p>
-      <p style="margin-top: 0.5rem;"><code>Ax = b</code></p>
-      <p style="margin-top: 0.5rem;">Donde <strong>A</strong> es la matriz de coeficientes de transferencia, <strong>b</strong> es el vector de latencias máximas permitidas (SLA), y <strong>x</strong> es el vector de tiempos de cómputo individuales por nodo.</p>
+  <div class="method-tabs">
+    <button class="tab-btn active" data-method="jacobi">Método de Jacobi</button>
+    <button class="tab-btn" data-method="lu">Factorización LU (Doolittle)</button>
+  </div>
+
+  <!-- ==================== JACOBI ==================== -->
+  <div id="jacobi" class="method-panel active">
+    <div class="main-grid">
+      <aside>
+        <div class="panel-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+          Método de Jacobi
+        </div>
+        
+        <div class="problem-info">
+          <strong>Contexto:</strong> Balance de carga en un clúster de 4 servidores interconectados. 
+          El sistema modela la distribución de peticiones web entre nodos en estado estacionario.
+        </div>
+
+        <div class="diagonal-dominant">
+          <h4>✓ Análisis de Diagonal Dominante Estricta (EDD)</h4>
+          <ul>
+            <li>Fila 1: |10| > |-2| + |-1| = 3 ✓</li>
+            <li>Fila 2: |8| > |-1| + |-2| = 3 ✓</li>
+            <li>Fila 3: |12| > |-2| + |-3| = 5 ✓</li>
+            <li>Fila 4: |9| > |-1| + |-2| = 3 ✓</li>
+          </ul>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--accent-success);">
+            <strong>Garantía:</strong> La matriz es EDD, por lo tanto Jacobi converge para cualquier vector inicial.
+          </p>
+        </div>
+
+        <div class="input-stack">
+          <div class="field">
+            <label for="jac_matrix">Matriz A (filas ;, columnas ,)</label>
+            <textarea id="jac_matrix">10,-2,-1,0;-1,8,0,-2;-2,0,12,-3;0,-1,-2,9</textarea>
+          </div>
+          <div class="field">
+            <label for="jac_vector">Vector b (separado por ,)</label>
+            <input type="text" id="jac_vector" value="15,18,25,20" />
+          </div>
+          <div class="field">
+            <label for="jac_x0">Vector inicial x⁽⁰⁾ (separado por ,)</label>
+            <input type="text" id="jac_x0" value="0,0,0,0" />
+          </div>
+          <div class="field">
+            <label for="jac_tol">Tolerancia ε</label>
+            <input type="number" id="jac_tol" value="0.0001" step="0.00001" min="0" />
+          </div>
+          <div class="field">
+            <label for="jac_maxIter">Máximo de iteraciones (máx. 100)</label>
+            <input type="number" id="jac_maxIter" value="50" step="1" min="1" max="100" />
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" id="jac_calcularBtn">Ejecutar Jacobi</button>
+            <button class="btn btn-ghost" id="jac_resetBtn">Restaurar Valores</button>
+          </div>
+        </div>
+        <div id="jac_status" class="status-bar hidden"></div>
+      </aside>
+
+      <main id="jac_resultados" class="results-section hidden">
+        <div>
+          <div class="panel-title">Historial de Iteraciones <span id="jac_iterCount" class="iter-count">[ 0 ITERACIONES ]</span></div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Iter k</th>
+                  <th>x₁</th>
+                  <th>x₂</th>
+                  <th>x₃</th>
+                  <th>x₄</th>
+                  <th>Error Rel. (%)</th>
+                </tr>
+              </thead>
+              <tbody id="jac_tablaBody"></tbody>
+            </table>
+          </div>
+          <div id="jac_convergenceInfo" class="convergence-info hidden"></div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-wrapper"><canvas id="jac_errorChart"></canvas></div>
+          <div class="chart-wrapper"><canvas id="jac_convergenceChart"></canvas></div>
+        </div>
+
+        <div class="conclusion-panel" id="jac_conclusion"></div>
+      </main>
+    </div>
+
+    <!-- ENTREGABLES JACOBI -->
+    <div class="entregables-section">
+      <div class="entregables-title">📋 ENTREGABLES: Método de Jacobi</div>
+      <div class="entregables-grid">
+        <div class="entregable-card">
+          <h3>1. Demostración de Convergencia</h3>
+          <h4>Matriz Diagonal Dominante Estricta (EDD)</h4>
+          <div class="formula-box">
+            <div class="comment">// Condición: |aᵢᵢ| > Σ|aᵢⱼ| para j ≠ i</div>
+            <div class="highlight">|10| > 3 ✓ | 8 | > 3 ✓ | 12 | > 5 ✓ | 9 | > 3 ✓</div>
+          </div>
+          <p><strong>Teorema:</strong> Si A es EDD, Jacobi converge para cualquier x⁽⁰⁾.</p>
+        </div>
+        <div class="entregable-card">
+          <h3>2. Código Fuente Documentado</h3>
+          <div class="code-screenshot">
+            <div class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = 0; i < n; i++) {</div>
+            <div class="line">  <span class="keyword">let</span> suma = 0;</div>
+            <div class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> j = 0; j < n; j++) {</div>
+            <div class="line">    <span class="keyword">if</span> (j !== i) suma += A[i][j] * x[j];</div>
+            <div class="line">  }</div>
+            <div class="line">  x_new[i] = (b[i] - suma) / A[i][i];</div>
+            <div class="line">}</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- SISTEMA DE ECUACIONES -->
-  <div class="method-panel">
-    <div class="panel-title"> Sistema de Ecuaciones</div>
+  <!-- ==================== FACTORIZACIÓN LU ==================== -->
+  <div id="lu" class="method-panel">
     <div class="problem-info">
-      <p>El clúster consta de <strong>3 microservicios</strong> (S₁, S₂, S₃) acoplados mediante la siguiente matriz de tráfico <strong>A</strong> y vector de SLA inicial <strong>b</strong>:</p>
+      <p>Una empresa Cloud gestiona un clúster de <strong>3 microservicios</strong>. El rendimiento depende de las latencias (xᵢ). Se tiene el modelo lineal:</p>
+      <p style="margin-top: 0.5rem;"><code>Ax = b</code></p>
       <div class="formula-box" style="margin-top: 1rem;">
         <div class="comment">// Sistema de ecuaciones</div>
         <div>4x₁ + 2x₂ + 1x₃ = 14 &nbsp;&nbsp;(Tráfico global)</div>
@@ -358,148 +690,128 @@
         <div>-8x₁ + 8x₂ + 7x₃ = 26 &nbsp;&nbsp;(Consultas a Base de Datos)</div>
       </div>
     </div>
-  </div>
 
-  <!-- ENTRADA DE DATOS -->
-  <div class="method-panel">
     <div class="main-grid">
       <aside>
-        <div class="panel-title">⚙️ Configuración</div>
+        <div class="panel-title">⚙️ Configuración LU</div>
         <div class="input-stack">
           <div class="field">
-            <label>Matriz A (3x3) - Filas separadas por ;, columnas por ,</label>
-            <textarea id="matrizA">4,2,1;12,10,5;-8,8,7</textarea>
+            <label>Matriz A (3x3) - Filas ;, columnas ,</label>
+            <textarea id="lu_matrizA">4,2,1;12,10,5;-8,8,7</textarea>
           </div>
           <div class="field">
-            <label>Vector b₁ (SLA inicial) - Valores separados por ,</label>
-            <input type="text" id="vectorB1" value="14,46,26" />
+            <label>Vector b₁ (SLA inicial) - Valores ,</label>
+            <input type="text" id="lu_vectorB1" value="14,46,26" />
           </div>
           <div class="field">
-            <label>Vector b₂ (SLA actualizado) - Valores separados por ,</label>
-            <input type="text" id="vectorB2" value="20,62,30" />
+            <label>Vector b₂ (SLA actualizado) - Valores ,</label>
+            <input type="text" id="lu_vectorB2" value="20,62,30" />
           </div>
           <div class="actions">
-            <button class="btn btn-primary" id="btnCalcularLU">
-              <span>🔢</span> Calcular Descomposición LU
-            </button>
-            <button class="btn btn-secondary" id="btnResolverB1">
-              <span>▶</span> Resolver con b₁
-            </button>
-            <button class="btn btn-secondary" id="btnResolverB2">
-              <span>▶</span> Resolver con b₂ (sin recalcular LU)
-            </button>
-            <button class="btn btn-ghost" id="btnReset">
-              Restaurar Valores
-            </button>
+            <button class="btn btn-primary" id="lu_btnCalcular">🔢 Calcular Descomposición LU</button>
+            <button class="btn btn-secondary" id="lu_btnResolverB1">▶ Resolver con b₁</button>
+            <button class="btn btn-secondary" id="lu_btnResolverB2">▶ Resolver con b₂ (sin recalcular LU)</button>
+            <button class="btn btn-ghost" id="lu_btnReset">Restaurar Valores</button>
           </div>
         </div>
       </aside>
 
-      <main id="resultados" class="results-section">
-        <!-- MATRICES L Y U -->
-        <div id="seccionLU" class="hidden">
+      <main id="lu_resultados" class="results-section">
+        <div id="lu_seccionLU" class="hidden">
           <div class="panel-title">📊 Descomposición A = LU</div>
           <div class="matrix-display">
             <div class="matrix-box">
               <h4>Matriz A (Original)</h4>
-              <div id="matrizA_display" class="matrix-grid"></div>
+              <div id="lu_matrizA_display" class="matrix-grid"></div>
             </div>
             <div class="matrix-box">
               <h4>Matriz L (Triangular Inferior)</h4>
-              <div id="matrizL_display" class="matrix-grid"></div>
+              <div id="lu_matrizL_display" class="matrix-grid"></div>
             </div>
             <div class="matrix-box">
               <h4>Matriz U (Triangular Superior)</h4>
-              <div id="matrizU_display" class="matrix-grid"></div>
+              <div id="lu_matrizU_display" class="matrix-grid"></div>
             </div>
           </div>
           <div class="step-box">
             <h4>📝 Verificación: L × U = A</h4>
-            <div id="verificacionLU"></div>
+            <div id="lu_verificacionLU"></div>
           </div>
         </div>
 
-        <!-- SOLUCIÓN CON b₁ -->
-        <div id="seccionB1" class="hidden">
+        <div id="lu_seccionB1" class="hidden">
           <div class="panel-title">🎯 Solución con b₁ = (14, 46, 26)ᵀ</div>
           <div class="comparison-grid">
             <div class="matrix-box">
               <h4>Paso 1: Sustitución hacia adelante (Ly = b₁)</h4>
-              <div id="vectorY1" class="vector-display"></div>
+              <div id="lu_vectorY1" class="vector-display"></div>
             </div>
             <div class="matrix-box">
               <h4>Paso 2: Sustitución hacia atrás (Ux = y)</h4>
-              <div id="vectorX1" class="vector-display"></div>
+              <div id="lu_vectorX1" class="vector-display"></div>
             </div>
           </div>
           <div class="solution-box">
             <h3>✅ Vector Solución x₁</h3>
-            <div id="solucionX1" class="vector-display"></div>
+            <div id="lu_solucionX1" class="vector-display"></div>
           </div>
         </div>
 
-        <!-- SOLUCIÓN CON b₂ -->
-        <div id="seccionB2" class="hidden">
-          <div class="panel-title">🎯 Solución con b₂ = (20, 62, 30) (usando LU ya calculada)</div>
+        <div id="lu_seccionB2" class="hidden">
+          <div class="panel-title">🎯 Solución con b₂ = (20, 62, 30)ᵀ (usando LU ya calculada)</div>
           <div class="comparison-grid">
             <div class="matrix-box">
               <h4>Paso 1: Sustitución hacia adelante (Ly = b₂)</h4>
-              <div id="vectorY2" class="vector-display"></div>
+              <div id="lu_vectorY2" class="vector-display"></div>
             </div>
             <div class="matrix-box">
               <h4>Paso 2: Sustitución hacia atrás (Ux = y)</h4>
-              <div id="vectorX2" class="vector-display"></div>
+              <div id="lu_vectorX2" class="vector-display"></div>
             </div>
           </div>
           <div class="solution-box">
             <h3>✅ Vector Solución x₂</h3>
-            <div id="solucionX2" class="vector-display"></div>
+            <div id="lu_solucionX2" class="vector-display"></div>
           </div>
         </div>
 
-        <!-- ANÁLISIS -->
-        <div id="seccionAnalisis" class="hidden">
-          <div class="panel-title"> Análisis de Resultados</div>
+        <div id="lu_seccionAnalisis" class="hidden">
+          <div class="panel-title">📈 Análisis de Resultados</div>
           <div class="step-box">
-            <h4> Interpretación del Balanceo de Carga</h4>
-            <div id="analisisInterpretacion"></div>
+            <h4>📡 Interpretación del Balanceo de Carga</h4>
+            <div id="lu_analisisInterpretacion"></div>
           </div>
           <div class="step-box">
             <h4>⚡ Ventaja de la Factorización LU</h4>
-            <div id="analisisVentaja"></div>
+            <div id="lu_analisisVentaja"></div>
           </div>
         </div>
       </main>
     </div>
-  </div>
 
-  <!-- DESARROLLO MATEMÁTICO -->
-  <div class="method-panel">
-    <div class="panel-title">📚 Desarrollo Matemático - Método de Doolittle</div>
-    <div class="step-box">
-      <h4>🔢 Algoritmo de Descomposición LU</h4>
-      <p>El método de Doolittle descompone la matriz A en el producto de dos matrices triangulares:</p>
-      <div class="formula-box">
-        <div class="comment">// A = L × U</div>
-        <div class="highlight">L = matriz triangular inferior (diagonal = 1)</div>
-        <div class="highlight">U = matriz triangular superior</div>
-        <br>
-        <div class="comment">// Fórmulas de Doolittle</div>
-        <div>Para i ≤ j: u[i][j] = a[i][j] - Σ(k=0 to i-1) l[i][k]·u[k][j]</div>
-        <div>Para i > j: l[i][j] = (a[i][j] - Σ(k=0 to j-1) l[i][k]·u[k][j]) / u[j][j]</div>
-      </div>
-    </div>
-    <div class="step-box">
-      <h4>🔄 Resolución del Sistema</h4>
-      <p>Una vez obtenidas L y U, resolvemos en dos pasos:</p>
-      <div class="formula-box">
-        <div class="comment">// Paso 1: Sustitución hacia adelante</div>
-        <div class="highlight">Ly = b → y = L⁻¹b</div>
-        <br>
-        <div class="comment">// Paso 2: Sustitución hacia atrás</div>
-        <div class="highlight">Ux = y → x = U⁻¹y</div>
-        <br>
-        <div class="comment">// Ventaja: O(n²) en lugar de O(n³) para cada nuevo b</div>
+    <!-- ENTREGABLES LU -->
+    <div class="entregables-section">
+      <div class="entregables-title">📋 ENTREGABLES: Factorización LU</div>
+      <div class="entregables-grid">
+        <div class="entregable-card">
+          <h3>1. Desarrollo Matemático (Doolittle)</h3>
+          <div class="formula-box">
+            <div class="comment">// A = L × U (Diagonal de L = 1)</div>
+            <div class="highlight">u[i][j] = a[i][j] - Σ l[i][k]·u[k][j]</div>
+            <div class="highlight">l[i][j] = (a[i][j] - Σ l[i][k]·u[k][j]) / u[j][j]</div>
+          </div>
+          <p><strong>Ventaja:</strong> O(n³) una vez, luego O(n²) para cada nuevo vector <strong>b</strong>.</p>
+        </div>
+        <div class="entregable-card">
+          <h3>2. Análisis de Ingeniería</h3>
+          <p>Para un clúster con <strong>n = 1000</strong> microservicios:</p>
+          <ul>
+            <li>LU una vez: ~10⁹ operaciones</li>
+            <li>Cada nuevo b con LU: ~10⁶ operaciones (1000× más rápido)</li>
+            <li>Gaussiana completa: ~10⁹ operaciones por cada b</li>
+          </ul>
+          <p style="margin-top: 1rem;">Esto permite recalcular latencias en tiempo real ante picos de tráfico sin saturar la CPU del balanceador.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -507,20 +819,12 @@
 </div>
 
 <script>
-  // ==================== VARIABLES GLOBALES ====================
-  let matrizL = null;
-  let matrizU = null;
-  let matrizA = null;
-  let n = 3;
-
-  // ==================== UTILIDADES ====================
-  function parsearMatriz(texto) {
-    return texto.split(';').map(fila => 
-      fila.split(',').map(valor => parseFloat(valor.trim()))
-    );
+  // ==================== UTILIDADES GLOBALES ====================
+  function parseMatrix(texto) {
+    return texto.split(';').map(fila => fila.split(',').map(valor => parseFloat(valor.trim())));
   }
 
-  function parsearVector(texto) {
+  function parseVector(texto) {
     return texto.split(',').map(valor => parseFloat(valor.trim()));
   }
 
@@ -528,26 +832,174 @@
     return Number.isInteger(num) ? num.toString() : num.toFixed(6);
   }
 
-  function renderizarMatriz(elementId, matriz, esLU = false) {
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById(this.dataset.method).classList.add('active');
+    });
+  });
+
+  // ==================== JACOBI ====================
+  const MAX_ITER_LIMIT = 100;
+  let jac_errorChart = null, jac_convergenceChart = null;
+
+  function setStatus(elementId, msg, type = 'success') {
+    const el = document.getElementById(elementId);
+    el.classList.remove('hidden', 'success', 'error');
+    el.classList.add(type);
+    el.textContent = (type === 'error' ? '⚠️ ' : '✅ ') + msg;
+  }
+
+  function checkDiagonalDominance(A) {
+    const n = A.length;
+    for (let i = 0; i < n; i++) {
+      let diag = Math.abs(A[i][i]);
+      let sum = 0;
+      for (let j = 0; j < n; j++) { if (i !== j) sum += Math.abs(A[i][j]); }
+      if (diag <= sum) return false;
+    }
+    return true;
+  }
+
+  function calcularJacobi() {
+    document.getElementById('jac_status').classList.add('hidden');
+    document.getElementById('jac_convergenceInfo').classList.add('hidden');
+    
+    const matrixStr = document.getElementById('jac_matrix').value.trim();
+    const vectorStr = document.getElementById('jac_vector').value.trim();
+    const x0Str = document.getElementById('jac_x0').value.trim();
+    const tol = parseFloat(document.getElementById('jac_tol').value);
+    let maxIter = Math.min(parseInt(document.getElementById('jac_maxIter').value) || 50, MAX_ITER_LIMIT);
+    document.getElementById('jac_maxIter').value = maxIter;
+
+    if (!matrixStr || !vectorStr || !x0Str || isNaN(tol) || tol <= 0 || maxIter < 1) {
+      setStatus('jac_status', 'Verifica que todos los campos sean válidos.', 'error'); return;
+    }
+
+    let A, b, x0;
+    try {
+      A = parseMatrix(matrixStr); b = parseVector(vectorStr); x0 = parseVector(x0Str);
+      if (A.length !== b.length || A.length !== x0.length) { setStatus('jac_status', 'Las dimensiones no coinciden.', 'error'); return; }
+      for (let i = 0; i < A.length; i++) { if (A[i].length !== A.length) { setStatus('jac_status', 'La matriz A debe ser cuadrada.', 'error'); return; } }
+    } catch (e) { setStatus('jac_status', 'Error al parsear la matriz o vectores.', 'error'); return; }
+
+    if (!checkDiagonalDominance(A)) {
+      setStatus('jac_status', 'La matriz NO es diagonal dominante estricta. Jacobi puede no converger.', 'error'); return;
+    }
+
+    const n = A.length;
+    const results = [];
+    let x = [...x0];
+    let converged = false, iteracionConvergencia = null;
+
+    for (let k = 0; k < maxIter; k++) {
+      let x_new = new Array(n).fill(0);
+      let maxError = 0;
+      for (let i = 0; i < n; i++) {
+        let suma = 0;
+        for (let j = 0; j < n; j++) { if (j !== i) suma += A[i][j] * x[j]; }
+        x_new[i] = (b[i] - suma) / A[i][i];
+        let err_i = Math.abs((x_new[i] - x[i]) / (x_new[i] === 0 ? 1e-15 : x_new[i])) * 100;
+        maxError = Math.max(maxError, err_i);
+      }
+      let row = { iter: k + 1, x: [...x_new], error: maxError, converged: false };
+      if (!converged && maxError <= tol) { converged = true; iteracionConvergencia = k + 1; row.converged = true; }
+      results.push(row);
+      x = [...x_new];
+    }
+
+    if (converged) {
+      document.getElementById('jac_convergenceInfo').textContent = `✅ Convergencia en iteración ${iteracionConvergencia} (error < ${tol})`;
+      document.getElementById('jac_convergenceInfo').classList.remove('hidden');
+      setStatus('jac_status', `Convergencia en iteración ${iteracionConvergencia} de ${maxIter}`, 'success');
+    } else {
+      document.getElementById('jac_convergenceInfo').textContent = `⚠️ No se alcanzó la convergencia en ${maxIter} iteraciones`;
+      document.getElementById('jac_convergenceInfo').classList.remove('hidden');
+      setStatus('jac_status', `No convergió en ${maxIter} iteraciones`, 'error');
+    }
+
+    // Render Tabla
+    let html = '';
+    results.forEach((r) => {
+      let rowClass = r.converged ? 'convergence-row' : (converged && r.iter > iteracionConvergencia ? 'post-convergence-row' : '');
+      let xValues = r.x.map(v => v.toFixed(6)).join('</td><td>');
+      html += `<tr class="${rowClass}"><td>${r.iter}</td><td>${xValues}</td><td>${r.error.toFixed(6)}</td></tr>`;
+    });
+    document.getElementById('jac_tablaBody').innerHTML = html;
+    document.getElementById('jac_iterCount').textContent = `[ ${maxIter} ITERACIONES ]`;
+    document.getElementById('jac_resultados').classList.remove('hidden');
+
+    // Render Gráficos
+    const labels = results.map(r => r.iter);
+    const errors = results.map(r => r.error);
+    if (jac_errorChart) jac_errorChart.destroy();
+    jac_errorChart = new Chart(document.getElementById('jac_errorChart').getContext('2d'), {
+      type: 'line', data: { labels, datasets: [{ label: 'Error Relativo (%)', data: errors, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', fill: true, tension: 0.3, pointRadius: 4 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { type: 'logarithmic', grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }, x: { grid: { display: false }, ticks: { color: '#9ca3af' } } } }
+    });
+
+    const colors = ['#06b6d4', '#8b5cf6', '#10b981', '#f59e0b'];
+    const datasets = [];
+    for (let i = 0; i < n; i++) {
+      datasets.push({ label: `x${i+1}`, data: results.map(r => r.x[i]), borderColor: colors[i % colors.length], fill: false, tension: 0.3, pointRadius: 3 });
+    }
+    if (jac_convergenceChart) jac_convergenceChart.destroy();
+    jac_convergenceChart = new Chart(document.getElementById('jac_convergenceChart').getContext('2d'), {
+      type: 'line', data: { labels, datasets },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: '#9ca3af' } } }, scales: { y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }, x: { grid: { display: false }, ticks: { color: '#9ca3af' } } } }
+    });
+
+    // Render Conclusión
+    const finalX = results[results.length - 1].x;
+    const xStr = finalX.map((v, i) => `x${i+1} ≈ ${v.toFixed(4)}`).join('<br>');
+    document.getElementById('jac_conclusion').innerHTML = `<h3>📌 Análisis de Resultados</h3>
+      <p>Mediante el Método de Jacobi, se resolvió el sistema Ax = b:<br><strong style="font-size: 1.1rem; color: var(--accent-primary); font-family: var(--font-mono);">${xStr}</strong></p>
+      <p><strong>Estado:</strong> ${converged ? `Convergencia alcanzada en la iteración ${iteracionConvergencia}.` : `No se alcanzó la tolerancia.`}</p>`;
+  }
+
+  function resetJacobi() {
+    document.getElementById('jac_matrix').value = '10,-2,-1,0;-1,8,0,-2;-2,0,12,-3;0,-1,-2,9';
+    document.getElementById('jac_vector').value = '15,18,25,20';
+    document.getElementById('jac_x0').value = '0,0,0,0';
+    document.getElementById('jac_tol').value = '0.0001';
+    document.getElementById('jac_maxIter').value = '50';
+    document.getElementById('jac_status').classList.add('hidden');
+    document.getElementById('jac_convergenceInfo').classList.add('hidden');
+    document.getElementById('jac_resultados').classList.add('hidden');
+    if (jac_errorChart) { jac_errorChart.destroy(); jac_errorChart = null; }
+    if (jac_convergenceChart) { jac_convergenceChart.destroy(); jac_convergenceChart = null; }
+  }
+
+  document.getElementById('jac_calcularBtn').addEventListener('click', calcularJacobi);
+  document.getElementById('jac_resetBtn').addEventListener('click', resetJacobi);
+  document.querySelectorAll('#jacobi input, #jacobi textarea').forEach(inp => {
+    inp.addEventListener('keypress', (e) => { if (e.key === 'Enter') calcularJacobi(); });
+  });
+
+
+  // ==================== FACTORIZACIÓN LU ====================
+  let lu_matrizL = null, lu_matrizU = null, lu_matrizA = null;
+
+  function lu_renderizarMatriz(elementId, matriz, esLU = false) {
     const container = document.getElementById(elementId);
     const size = matriz.length;
     container.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     container.innerHTML = '';
-    
     for (let i = 0; i < size; i++) {
       for (let j = 0; j < size; j++) {
         const cell = document.createElement('div');
         cell.className = 'matrix-cell';
-        if (esLU) {
-          if (i === j && elementId.includes('L')) cell.classList.add('highlight');
-        }
+        if (esLU && i === j && elementId.includes('L')) cell.classList.add('highlight');
         cell.textContent = formatearNumero(matriz[i][j]);
         container.appendChild(cell);
       }
     }
   }
 
-  function renderizarVector(elementId, vector, etiqueta = '') {
+  function lu_renderizarVector(elementId, vector, etiqueta = '') {
     const container = document.getElementById(elementId);
     container.innerHTML = '';
     vector.forEach((valor, idx) => {
@@ -558,226 +1010,138 @@
     });
   }
 
-  // ==================== MÉTODO DE DOOLITTLE ====================
-  function descomposicionLU(A) {
+  function lu_descomposicion(A) {
     const n = A.length;
     const L = Array.from({length: n}, () => Array(n).fill(0));
     const U = Array.from({length: n}, () => Array(n).fill(0));
+    for (let i = 0; i < n; i++) L[i][i] = 1;
 
     for (let i = 0; i < n; i++) {
-      L[i][i] = 1; // Diagonal de L = 1
-    }
-
-    for (let i = 0; i < n; i++) {
-      // Calcular U[i][j] para j >= i
       for (let j = i; j < n; j++) {
         let suma = 0;
-        for (let k = 0; k < i; k++) {
-          suma += L[i][k] * U[k][j];
-        }
+        for (let k = 0; k < i; k++) suma += L[i][k] * U[k][j];
         U[i][j] = A[i][j] - suma;
       }
-
-      // Calcular L[i][j] para j < i
       for (let j = 0; j < i; j++) {
         let suma = 0;
-        for (let k = 0; k < j; k++) {
-          suma += L[i][k] * U[k][j];
-        }
+        for (let k = 0; k < j; k++) suma += L[i][k] * U[k][j];
         L[i][j] = (A[i][j] - suma) / U[j][j];
       }
     }
-
     return { L, U };
   }
 
-  // ==================== SUSTITUCIÓN HACIA ADELANTE ====================
-  function sustitucionAdelante(L, b) {
+  function lu_sustitucionAdelante(L, b) {
     const n = L.length;
     const y = Array(n).fill(0);
-
     for (let i = 0; i < n; i++) {
       let suma = 0;
-      for (let j = 0; j < i; j++) {
-        suma += L[i][j] * y[j];
-      }
+      for (let j = 0; j < i; j++) suma += L[i][j] * y[j];
       y[i] = (b[i] - suma) / L[i][i];
     }
-
     return y;
   }
 
-  // ==================== SUSTITUCIÓN HACIA ATRÁS ====================
-  function sustitucionAtras(U, y) {
+  function lu_sustitucionAtras(U, y) {
     const n = U.length;
     const x = Array(n).fill(0);
-
     for (let i = n - 1; i >= 0; i--) {
       let suma = 0;
-      for (let j = i + 1; j < n; j++) {
-        suma += U[i][j] * x[j];
-      }
+      for (let j = i + 1; j < n; j++) suma += U[i][j] * x[j];
       x[i] = (y[i] - suma) / U[i][i];
     }
-
     return x;
   }
 
-  // ==================== VERIFICACIÓN L×U = A ====================
-  function multiplicarMatrices(L, U) {
+  function lu_multiplicarMatrices(L, U) {
     const n = L.length;
     const resultado = Array.from({length: n}, () => Array(n).fill(0));
-
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
         let suma = 0;
-        for (let k = 0; k < n; k++) {
-          suma += L[i][k] * U[k][j];
-        }
+        for (let k = 0; k < n; k++) suma += L[i][k] * U[k][j];
         resultado[i][j] = suma;
       }
     }
-
     return resultado;
   }
 
-  // ==================== CÁLCULO PRINCIPAL ====================
-  function calcularLU() {
+  function lu_calcular() {
     try {
-      const textoA = document.getElementById('matrizA').value;
-      matrizA = parsearMatriz(textoA);
-      n = matrizA.length;
+      const textoA = document.getElementById('lu_matrizA').value;
+      lu_matrizA = parseMatrix(textoA);
+      const { L, U } = lu_descomposicion(lu_matrizA);
+      lu_matrizL = L; lu_matrizU = U;
 
-      const { L, U } = descomposicionLU(matrizA);
-      matrizL = L;
-      matrizU = U;
+      lu_renderizarMatriz('lu_matrizA_display', lu_matrizA);
+      lu_renderizarMatriz('lu_matrizL_display', lu_matrizL, true);
+      lu_renderizarMatriz('lu_matrizU_display', lu_matrizU, true);
 
-      // Mostrar matrices
-      renderizarMatriz('matrizA_display', matrizA);
-      renderizarMatriz('matrizL_display', matrizL, true);
-      renderizarMatriz('matrizU_display', matrizU, true);
-
-      // Verificación
-      const LU = multiplicarMatrices(matrizL, matrizU);
-      let verifHTML = '<div class="formula-box">';
-      verifHTML += '<div class="comment">// Verificación: L × U debe ser igual a A</div>';
+      const LU = lu_multiplicarMatrices(lu_matrizL, lu_matrizU);
       let esCorrecto = true;
-      for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-          const diff = Math.abs(LU[i][j] - matrizA[i][j]);
-          if (diff > 1e-10) esCorrecto = false;
+      for (let i = 0; i < lu_matrizA.length; i++) {
+        for (let j = 0; j < lu_matrizA.length; j++) {
+          if (Math.abs(LU[i][j] - lu_matrizA[i][j]) > 1e-10) esCorrecto = false;
         }
       }
-      verifHTML += `<div>L × U = A: <span class="highlight">${esCorrecto ? '✓ CORRECTO' : '✗ ERROR'}</span></div>`;
-      verifHTML += '</div>';
-      document.getElementById('verificacionLU').innerHTML = verifHTML;
-
-      document.getElementById('seccionLU').classList.remove('hidden');
-
+      document.getElementById('lu_verificacionLU').innerHTML = `<div class="formula-box"><div class="comment">// Verificación: L × U debe ser igual a A</div><div>L × U = A: <span class="highlight">${esCorrecto ? '✓ CORRECTO' : '✗ ERROR'}</span></div></div>`;
+      document.getElementById('lu_seccionLU').classList.remove('hidden');
     } catch (error) {
       alert('Error al calcular LU: ' + error.message);
     }
   }
 
-  function resolverSistema(b, numB) {
-    if (!matrizL || !matrizU) {
-      alert('Primero calcula la descomposición LU');
-      return;
-    }
-
+  function lu_resolverSistema(b, numB) {
+    if (!lu_matrizL || !lu_matrizU) { alert('Primero calcula la descomposición LU'); return; }
     try {
-      // Paso 1: Ly = b
-      const y = sustitucionAdelante(matrizL, b);
-      
-      // Paso 2: Ux = y
-      const x = sustitucionAtras(matrizU, y);
+      const y = lu_sustitucionAdelante(lu_matrizL, b);
+      const x = lu_sustitucionAtras(lu_matrizU, y);
 
-      // Mostrar resultados
-      renderizarVector(`vectorY${numB}`, y, 'y');
-      renderizarVector(`vectorX${numB}`, x, 'x');
-      renderizarVector(`solucionX${numB}`, x, 'x');
+      lu_renderizarVector(`lu_vectorY${numB}`, y, 'y');
+      lu_renderizarVector(`lu_vectorX${numB}`, x, 'x');
+      lu_renderizarVector(`lu_solucionX${numB}`, x, 'x');
 
-      document.getElementById(`seccionB${numB}`).classList.remove('hidden');
-      document.getElementById('seccionAnalisis').classList.remove('hidden');
+      document.getElementById(`lu_seccionB${numB}`).classList.remove('hidden');
+      document.getElementById('lu_seccionAnalisis').classList.remove('hidden');
 
-      // Análisis
       if (numB === 1) {
-        document.getElementById('analisisInterpretacion').innerHTML = `
+        document.getElementById('lu_analisisInterpretacion').innerHTML = `
           <p>Los tiempos de cómputo óptimos para cada microservicio son:</p>
           <ul style="margin-left: 20px; margin-top: 10px;">
             <li><strong>S₁ (Tráfico global):</strong> x₁ = ${formatearNumero(x[0])} ms</li>
             <li><strong>S₂ (Backend):</strong> x₂ = ${formatearNumero(x[1])} ms</li>
             <li><strong>S₃ (Base de Datos):</strong> x₃ = ${formatearNumero(x[2])} ms</li>
-          </ul>
-          <p style="margin-top: 10px;">Estos valores garantizan que el clúster cumple con los SLA definidos en b₁.</p>
-        `;
+          </ul>`;
+        document.getElementById('lu_analisisVentaja').innerHTML = `
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li>Descomposición LU: <strong>O(n³)</strong> - Se calcula UNA sola vez</li>
+            <li>Cada nuevo vector b: <strong>O(n²)</strong> - Solo sustituciones</li>
+            <li>Para n = 1000: LU toma ~10⁹ ops, pero cada nuevo b toma solo ~10⁶ ops (1000× más rápido que Gaussiana completa).</li>
+          </ul>`;
       }
-
     } catch (error) {
       alert('Error al resolver el sistema: ' + error.message);
     }
   }
 
-  function mostrarVentajaLU() {
-    const analisisHTML = `
-      <p><strong>Ventaja computacional:</strong></p>
-      <ul style="margin-left: 20px; margin-top: 10px;">
-        <li>Descomposición LU: <strong>O(n³)</strong> - Se calcula UNA sola vez</li>
-        <li>Cada nuevo vector b: <strong>O(n²)</strong> - Solo sustituciones</li>
-        <li>Eliminación Gaussiana completa: <strong>O(n³)</strong> - Para cada nuevo b</li>
-      </ul>
-      <p style="margin-top: 10px;">Para un clúster con <strong>n = 1000</strong> microservicios:</p>
-      <ul style="margin-left: 20px; margin-top: 10px;">
-        <li>LU una vez: ~10⁹ operaciones</li>
-        <li>Cada nuevo b con LU: ~10⁶ operaciones (1000× más rápido)</li>
-        <li>Gaussiana completa: ~10⁹ operaciones por cada b</li>
-      </ul>
-    `;
-    document.getElementById('analisisVentaja').innerHTML = analisisHTML;
+  function lu_reset() {
+    document.getElementById('lu_matrizA').value = '4,2,1;12,10,5;-8,8,7';
+    document.getElementById('lu_vectorB1').value = '14,46,26';
+    document.getElementById('lu_vectorB2').value = '20,62,30';
+    ['lu_seccionLU', 'lu_seccionB1', 'lu_seccionB2', 'lu_seccionAnalisis'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    lu_matrizL = null; lu_matrizU = null; lu_matrizA = null;
   }
 
-  // ==================== EVENT LISTENERS ====================
-  document.getElementById('btnCalcularLU').addEventListener('click', () => {
-    calcularLU();
-    mostrarVentajaLU();
-  });
-
-  document.getElementById('btnResolverB1').addEventListener('click', () => {
-    if (!matrizL || !matrizU) {
-      alert('Primero calcula la descomposición LU');
-      return;
-    }
-    const b1 = parsearVector(document.getElementById('vectorB1').value);
-    resolverSistema(b1, 1);
-  });
-
-  document.getElementById('btnResolverB2').addEventListener('click', () => {
-    if (!matrizL || !matrizU) {
-      alert('Primero calcula la descomposición LU');
-      return;
-    }
-    const b2 = parsearVector(document.getElementById('vectorB2').value);
-    resolverSistema(b2, 2);
-  });
-
-  document.getElementById('btnReset').addEventListener('click', () => {
-    document.getElementById('matrizA').value = '4,2,1;12,10,5;-8,8,7';
-    document.getElementById('vectorB1').value = '14,46,26';
-    document.getElementById('vectorB2').value = '20,62,30';
-    document.getElementById('seccionLU').classList.add('hidden');
-    document.getElementById('seccionB1').classList.add('hidden');
-    document.getElementById('seccionB2').classList.add('hidden');
-    document.getElementById('seccionAnalisis').classList.add('hidden');
-    matrizL = null;
-    matrizU = null;
-    matrizA = null;
-  });
+  document.getElementById('lu_btnCalcular').addEventListener('click', lu_calcular);
+  document.getElementById('lu_btnResolverB1').addEventListener('click', () => lu_resolverSistema(parseVector(document.getElementById('lu_vectorB1').value), 1));
+  document.getElementById('lu_btnResolverB2').addEventListener('click', () => lu_resolverSistema(parseVector(document.getElementById('lu_vectorB2').value), 2));
+  document.getElementById('lu_btnReset').addEventListener('click', lu_reset);
 
   // Inicializar
   window.onload = function() {
-    calcularLU();
-    const b1 = parsearVector(document.getElementById('vectorB1').value);
-    resolverSistema(b1, 1);
+    resetJacobi();
+    lu_calcular();
+    lu_resolverSistema(parseVector(document.getElementById('lu_vectorB1').value), 1);
   };
 </script>
 
