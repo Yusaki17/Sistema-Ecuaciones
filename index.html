@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Métodos Numéricos · Sistemas Lineales</title>
+  <title>Métodos Numéricos · Sistemas Lineales e Interpolación</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -89,16 +89,8 @@
       transition: all 0.3s;
     }
 
-    .tab-btn:hover {
-      color: var(--text-main);
-      background: rgba(6, 182, 212, 0.1);
-    }
-
-    .tab-btn.active {
-      background: var(--bg-card);
-      color: var(--accent-primary);
-      border-color: var(--accent-primary);
-    }
+    .tab-btn:hover { color: var(--text-main); background: rgba(6, 182, 212, 0.1); }
+    .tab-btn.active { background: var(--bg-card); color: var(--accent-primary); border-color: var(--accent-primary); }
 
     .method-panel {
       background: var(--bg-card);
@@ -108,9 +100,7 @@
       position: relative;
       display: none;
     }
-
     .method-panel.active { display: block; }
-
     .method-panel::before {
       content: '';
       position: absolute;
@@ -138,7 +128,6 @@
       font-size: 0.9rem;
       line-height: 1.7;
     }
-
     .problem-info code {
       background: rgba(0,0,0,0.3);
       padding: 0.2rem 0.5rem;
@@ -154,17 +143,9 @@
       gap: 2rem;
       align-items: start;
     }
+    @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
 
-    @media (max-width: 1024px) {
-      .main-grid { grid-template-columns: 1fr; }
-    }
-
-    .input-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
+    .input-stack { display: flex; flex-direction: column; gap: 1.25rem; }
     .field label {
       display: block;
       font-family: var(--font-mono);
@@ -173,7 +154,6 @@
       margin-bottom: 0.4rem;
       text-transform: uppercase;
     }
-
     .field input, .field textarea {
       width: 100%;
       background: var(--bg-input);
@@ -185,25 +165,14 @@
       font-size: 0.9rem;
       transition: all 0.2s;
     }
-
-    .field textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
+    .field textarea { resize: vertical; min-height: 100px; }
     .field input:focus, .field textarea:focus {
       outline: none;
       border-color: var(--accent-primary);
       box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
     }
 
-    .actions {
-      margin-top: 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
+    .actions { margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem; }
     .btn {
       width: 100%;
       padding: 0.85rem;
@@ -219,332 +188,124 @@
       justify-content: center;
       gap: 0.5rem;
     }
-
     .btn-primary { background: var(--accent-primary); color: #000; }
     .btn-primary:hover { background: #22d3ee; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3); }
-    
     .btn-secondary { background: var(--accent-secondary); color: #fff; }
     .btn-secondary:hover { background: #7c3aed; transform: translateY(-1px); }
-
     .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
     .btn-ghost:hover { border-color: var(--text-muted); color: var(--text-main); background: rgba(255,255,255,0.03); }
 
-    .results-section {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-      animation: fadeIn 0.5s ease-out;
-    }
+    .results-section { display: flex; flex-direction: column; gap: 2rem; animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .table-container {
-      overflow-x: auto;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      max-height: 600px;
-      overflow-y: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-    }
-
+    .table-container { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; max-height: 600px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.85rem; }
     th {
-      background: #1f2937;
-      color: var(--text-muted);
-      text-align: right;
-      padding: 0.75rem 1rem;
-      font-weight: 500;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      background: #1f2937; color: var(--text-muted); text-align: right; padding: 0.75rem 1rem;
+      font-weight: 500; border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; z-index: 10;
     }
     th:first-child { text-align: center; }
-
-    td {
-      padding: 0.6rem 1rem;
-      text-align: right;
-      border-bottom: 1px solid #1f2937;
-      color: #d1d5db;
-    }
+    td { padding: 0.6rem 1rem; text-align: right; border-bottom: 1px solid #1f2937; color: #d1d5db; }
     td:first-child { text-align: center; color: var(--text-muted); }
-
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: rgba(255,255,255,0.02); }
-
     .convergence-row td {
-      color: var(--accent-success);
-      font-weight: 700;
-      background: rgba(16, 185, 129, 0.15);
-      border-top: 2px solid var(--accent-success);
-      border-bottom: 2px solid var(--accent-success);
+      color: var(--accent-success); font-weight: 700; background: rgba(16, 185, 129, 0.15);
+      border-top: 2px solid var(--accent-success); border-bottom: 2px solid var(--accent-success);
     }
-
-    .post-convergence-row td {
-      color: var(--text-muted);
-      opacity: 0.6;
-    }
+    .post-convergence-row td { color: var(--text-muted); opacity: 0.6; }
 
     .status-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 1rem;
-      padding: 1rem;
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
+      display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;
+      padding: 1rem; border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem;
     }
     .status-bar.success { background: rgba(16, 185, 129, 0.1); color: var(--accent-success); border: 1px solid rgba(16, 185, 129, 0.2); }
     .status-bar.error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
     .status-bar.hidden { display: none; }
 
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
     @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
-
-    .chart-wrapper {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1rem;
-      height: 350px;
-    }
+    .chart-wrapper { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; height: 400px; }
 
     .conclusion-panel, .result-card, .step-box {
-      background: rgba(6, 182, 212, 0.05);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
+      background: rgba(6, 182, 212, 0.05); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;
     }
-    
-    .step-box {
-      background: rgba(139, 92, 246, 0.05);
-      border-left: 3px solid var(--accent-secondary);
-      border-radius: 0 6px 6px 0;
-    }
-
+    .step-box { background: rgba(139, 92, 246, 0.05); border-left: 3px solid var(--accent-secondary); border-radius: 0 6px 6px 0; }
     .conclusion-panel h3, .result-card h3, .step-box h4 {
-      color: var(--accent-primary);
-      font-size: 1.1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      color: var(--accent-primary); font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
     }
     .step-box h4 { color: var(--accent-secondary); }
 
-    .result-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .result-item:last-child { border-bottom: none; }
-    .result-label { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.85rem; }
-    .result-value { 
-      color: var(--accent-success); 
-      font-family: var(--font-mono); 
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    .matrix-display {
-      display: grid;
-      gap: 1rem;
-      margin: 1rem 0;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
-    .matrix-box {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 1rem;
-    }
-    .matrix-box h4 {
-      color: var(--accent-primary);
-      margin-bottom: 0.75rem;
-      font-size: 0.95rem;
-    }
-    .matrix-grid {
-      display: grid;
-      gap: 0.25rem;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-    }
-    .matrix-cell {
-      padding: 0.4rem 0.6rem;
-      background: rgba(255,255,255,0.03);
-      border-radius: 4px;
-      text-align: center;
-      color: var(--text-main);
-    }
-    .matrix-cell.highlight {
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--accent-success);
-      font-weight: 600;
-    }
+    .matrix-display { display: grid; gap: 1rem; margin: 1rem 0; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .matrix-box { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; }
+    .matrix-box h4 { color: var(--accent-primary); margin-bottom: 0.75rem; font-size: 0.95rem; }
+    .matrix-grid { display: grid; gap: 0.25rem; font-family: var(--font-mono); font-size: 0.85rem; }
+    .matrix-cell { padding: 0.4rem 0.6rem; background: rgba(255,255,255,0.03); border-radius: 4px; text-align: center; color: var(--text-main); }
+    .matrix-cell.highlight { background: rgba(16, 185, 129, 0.2); color: var(--accent-success); font-weight: 600; }
 
     .formula-box {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 1rem;
-      margin: 1rem 0;
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
-      color: var(--accent-primary);
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px;
+      padding: 1rem; margin: 1rem 0; font-family: var(--font-mono); font-size: 0.9rem; color: var(--accent-primary);
     }
     .formula-box .comment { color: var(--text-muted); font-style: italic; }
     .formula-box .highlight { color: var(--accent-success); font-weight: 600; }
 
     .hidden { display: none !important; }
-
-    .iter-count {
-      margin-left: auto;
-      font-family: var(--font-mono);
-      color: var(--accent-primary);
-      font-size: 0.8rem;
-    }
-
+    .iter-count { margin-left: auto; font-family: var(--font-mono); color: var(--accent-primary); font-size: 0.8rem; }
     .convergence-info {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid var(--accent-success);
-      border-radius: 6px;
-      padding: 0.75rem 1rem;
-      margin-top: 1rem;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      color: var(--accent-success);
+      background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-success); border-radius: 6px;
+      padding: 0.75rem 1rem; margin-top: 1rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-success);
     }
     .convergence-info.hidden { display: none; }
 
     .diagonal-dominant {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid var(--accent-success);
-      border-radius: 6px;
-      padding: 1rem;
-      margin: 1rem 0;
+      background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-success); border-radius: 6px; padding: 1rem; margin: 1rem 0;
     }
     .diagonal-dominant h4 { color: var(--accent-success); margin-bottom: 0.5rem; }
     .diagonal-dominant ul { list-style: none; padding-left: 0; }
     .diagonal-dominant li { padding: 0.3rem 0; color: #d1d5db; font-size: 0.9rem; }
     .diagonal-dominant li::before { content: '✓ '; color: var(--accent-success); font-weight: bold; }
 
-    .vector-display {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      font-family: var(--font-mono);
-    }
-    .vector-item {
-      padding: 0.4rem 0.6rem;
-      background: rgba(255,255,255,0.03);
-      border-radius: 4px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .solution-box {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid var(--accent-success);
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-top: 1rem;
-    }
+    .vector-display { display: flex; flex-direction: column; gap: 0.25rem; font-family: var(--font-mono); }
+    .vector-item { padding: 0.4rem 0.6rem; background: rgba(255,255,255,0.03); border-radius: 4px; display: flex; justify-content: space-between; }
+    .solution-box { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-success); border-radius: 8px; padding: 1.5rem; margin-top: 1rem; }
     .solution-box h3 { color: var(--accent-success); margin-bottom: 1rem; }
+    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem; }
+    @media (max-width: 768px) { .comparison-grid { grid-template-columns: 1fr; } }
 
-    .comparison-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-top: 1rem;
+    /* Estilos específicos para Lagrange */
+    .lagrange-result-value {
+      font-size: 2.5rem; font-weight: 800; color: var(--accent-primary); text-align: center;
+      margin: 1rem 0; font-family: var(--font-mono);
     }
-    @media (max-width: 768px) {
-      .comparison-grid { grid-template-columns: 1fr; }
+    .lagrange-data-table {
+      width: 100%; border-collapse: collapse; margin: 1rem 0; background: var(--bg-input);
+      border-radius: 8px; overflow: hidden;
     }
-
-    .entregables-section {
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 2px solid var(--border);
+    .lagrange-data-table thead { background: rgba(6, 182, 212, 0.2); }
+    .lagrange-data-table th {
+      padding: 1rem; text-align: left; font-weight: 600; font-size: 0.9rem; color: var(--accent-primary);
     }
-    .entregables-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--accent-warning);
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
+    .lagrange-data-table td {
+      padding: 0.9rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; color: var(--text-main);
     }
-    .entregables-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      margin-bottom: 2rem;
+    .lagrange-data-table tbody tr:hover { background-color: rgba(255,255,255,0.03); }
+    .lagrange-step {
+      margin-bottom: 1rem; padding: 1rem; background: rgba(0,0,0,0.2);
+      border-left: 3px solid var(--accent-secondary); border-radius: 0 6px 6px 0;
     }
-    @media (max-width: 1024px) { .entregables-grid { grid-template-columns: 1fr; } }
-    
-    .entregable-card {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.5rem;
+    .lagrange-formula {
+      font-family: var(--font-mono); background: rgba(0,0,0,0.4); padding: 0.75rem;
+      border-radius: 4px; margin: 0.5rem 0; color: var(--accent-primary); font-size: 0.9rem; line-height: 1.6;
     }
-    .entregable-card h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--accent-primary);
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .coef-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;
+      font-family: var(--font-mono); font-size: 0.9rem; margin-top: 1rem;
     }
-    .entregable-card h4 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-main);
-      margin: 1rem 0 0.5rem 0;
+    .coef-item {
+      background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 4px;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .entregable-card p, .entregable-card li {
-      color: #d1d5db;
-      line-height: 1.7;
-      font-size: 0.9rem;
-    }
-    .entregable-card ul { list-style: none; padding-left: 0; }
-    .entregable-card ul li { padding: 0.3rem 0; padding-left: 1.5rem; position: relative; }
-    .entregable-card ul li::before { content: '→'; position: absolute; left: 0; color: var(--accent-primary); }
-
-    .code-screenshot {
-      background: #000;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1rem;
-      margin-top: 1rem;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: #10b981;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-    .code-screenshot .line { padding: 0.2rem 0; }
-    .code-screenshot .keyword { color: #8b5cf6; }
-    .code-screenshot .function { color: #06b6d4; }
-    .code-screenshot .comment { color: #6b7280; font-style: italic; }
   </style>
 </head>
 <body>
@@ -553,14 +314,15 @@
   <header>
     <div>
       <h1>MÉTODOS NUMÉRICOS</h1>
-      <div class="subtitle">Sistemas Lineales · Jacobi · Factorización LU</div>
+      <div class="subtitle">Sistemas Lineales · Interpolación</div>
     </div>
-    <div style="font-family: var(--font-mono); color: var(--accent-primary); font-size: 0.8rem;">v7.0</div>
+    <div style="font-family: var(--font-mono); color: var(--accent-primary); font-size: 0.8rem;">v9.0</div>
   </header>
 
   <div class="method-tabs">
     <button class="tab-btn active" data-method="jacobi">Método de Jacobi</button>
-    <button class="tab-btn" data-method="lu">Factorización LU (Doolittle)</button>
+    <button class="tab-btn" data-method="lu">Factorización LU</button>
+    <button class="tab-btn" data-method="lagrange">Interpolación de Lagrange</button>
   </div>
 
   <!-- ==================== JACOBI ==================== -->
@@ -571,12 +333,10 @@
           <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
           Método de Jacobi
         </div>
-        
         <div class="problem-info">
           <strong>Contexto:</strong> Balance de carga en un clúster de 4 servidores interconectados. 
           El sistema modela la distribución de peticiones web entre nodos en estado estacionario.
         </div>
-
         <div class="diagonal-dominant">
           <h4>✓ Análisis de Diagonal Dominante Estricta (EDD)</h4>
           <ul>
@@ -585,32 +345,13 @@
             <li>Fila 3: |12| > |-2| + |-3| = 5 ✓</li>
             <li>Fila 4: |9| > |-1| + |-2| = 3 ✓</li>
           </ul>
-          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--accent-success);">
-            <strong>Garantía:</strong> La matriz es EDD, por lo tanto Jacobi converge para cualquier vector inicial.
-          </p>
         </div>
-
         <div class="input-stack">
-          <div class="field">
-            <label for="jac_matrix">Matriz A (filas ;, columnas ,)</label>
-            <textarea id="jac_matrix">10,-2,-1,0;-1,8,0,-2;-2,0,12,-3;0,-1,-2,9</textarea>
-          </div>
-          <div class="field">
-            <label for="jac_vector">Vector b (separado por ,)</label>
-            <input type="text" id="jac_vector" value="15,18,25,20" />
-          </div>
-          <div class="field">
-            <label for="jac_x0">Vector inicial x⁽⁰⁾ (separado por ,)</label>
-            <input type="text" id="jac_x0" value="0,0,0,0" />
-          </div>
-          <div class="field">
-            <label for="jac_tol">Tolerancia ε</label>
-            <input type="number" id="jac_tol" value="0.0001" step="0.00001" min="0" />
-          </div>
-          <div class="field">
-            <label for="jac_maxIter">Máximo de iteraciones (máx. 100)</label>
-            <input type="number" id="jac_maxIter" value="50" step="1" min="1" max="100" />
-          </div>
+          <div class="field"><label>Matriz A (filas ;, columnas ,)</label><textarea id="jac_matrix">10,-2,-1,0;-1,8,0,-2;-2,0,12,-3;0,-1,-2,9</textarea></div>
+          <div class="field"><label>Vector b (separado por ,)</label><input type="text" id="jac_vector" value="15,18,25,20" /></div>
+          <div class="field"><label>Vector inicial x⁽⁰⁾ (separado por ,)</label><input type="text" id="jac_x0" value="0,0,0,0" /></div>
+          <div class="field"><label>Tolerancia ε</label><input type="number" id="jac_tol" value="0.0001" step="0.00001" min="0" /></div>
+          <div class="field"><label>Máximo de iteraciones</label><input type="number" id="jac_maxIter" value="50" step="1" min="1" max="100" /></div>
           <div class="actions">
             <button class="btn btn-primary" id="jac_calcularBtn">Ejecutar Jacobi</button>
             <button class="btn btn-ghost" id="jac_resetBtn">Restaurar Valores</button>
@@ -618,201 +359,165 @@
         </div>
         <div id="jac_status" class="status-bar hidden"></div>
       </aside>
-
       <main id="jac_resultados" class="results-section hidden">
         <div>
           <div class="panel-title">Historial de Iteraciones <span id="jac_iterCount" class="iter-count">[ 0 ITERACIONES ]</span></div>
           <div class="table-container">
             <table>
-              <thead>
-                <tr>
-                  <th>Iter k</th>
-                  <th>x₁</th>
-                  <th>x₂</th>
-                  <th>x₃</th>
-                  <th>x₄</th>
-                  <th>Error Rel. (%)</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Iter k</th><th>x₁</th><th>x₂</th><th>x₃</th><th>x₄</th><th>Error Rel. (%)</th></tr></thead>
               <tbody id="jac_tablaBody"></tbody>
             </table>
           </div>
           <div id="jac_convergenceInfo" class="convergence-info hidden"></div>
         </div>
-
         <div class="charts-grid">
           <div class="chart-wrapper"><canvas id="jac_errorChart"></canvas></div>
           <div class="chart-wrapper"><canvas id="jac_convergenceChart"></canvas></div>
         </div>
-
         <div class="conclusion-panel" id="jac_conclusion"></div>
       </main>
-    </div>
-
-    <!-- ENTREGABLES JACOBI -->
-    <div class="entregables-section">
-      <div class="entregables-title">📋 ENTREGABLES: Método de Jacobi</div>
-      <div class="entregables-grid">
-        <div class="entregable-card">
-          <h3>1. Demostración de Convergencia</h3>
-          <h4>Matriz Diagonal Dominante Estricta (EDD)</h4>
-          <div class="formula-box">
-            <div class="comment">// Condición: |aᵢᵢ| > Σ|aᵢⱼ| para j ≠ i</div>
-            <div class="highlight">|10| > 3 ✓ | 8 | > 3 ✓ | 12 | > 5 ✓ | 9 | > 3 ✓</div>
-          </div>
-          <p><strong>Teorema:</strong> Si A es EDD, Jacobi converge para cualquier x⁽⁰⁾.</p>
-        </div>
-        <div class="entregable-card">
-          <h3>2. Código Fuente Documentado</h3>
-          <div class="code-screenshot">
-            <div class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = 0; i < n; i++) {</div>
-            <div class="line">  <span class="keyword">let</span> suma = 0;</div>
-            <div class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> j = 0; j < n; j++) {</div>
-            <div class="line">    <span class="keyword">if</span> (j !== i) suma += A[i][j] * x[j];</div>
-            <div class="line">  }</div>
-            <div class="line">  x_new[i] = (b[i] - suma) / A[i][i];</div>
-            <div class="line">}</div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
   <!-- ==================== FACTORIZACIÓN LU ==================== -->
   <div id="lu" class="method-panel">
     <div class="problem-info">
-      <p>Una empresa Cloud gestiona un clúster de <strong>3 microservicios</strong>. El rendimiento depende de las latencias (xᵢ). Se tiene el modelo lineal:</p>
-      <p style="margin-top: 0.5rem;"><code>Ax = b</code></p>
-      <div class="formula-box" style="margin-top: 1rem;">
-        <div class="comment">// Sistema de ecuaciones</div>
-        <div>4x₁ + 2x₂ + 1x₃ = 14 &nbsp;&nbsp;(Tráfico global)</div>
-        <div>12x₁ + 10x₂ + 5x₃ = 46 &nbsp;&nbsp;(Procesamiento backend)</div>
-        <div>-8x₁ + 8x₂ + 7x₃ = 26 &nbsp;&nbsp;(Consultas a Base de Datos)</div>
-      </div>
+      <p>Una empresa Cloud gestiona un clúster de <strong>3 microservicios</strong>. El rendimiento depende de las latencias (xᵢ). Se tiene el modelo lineal: <code>Ax = b</code></p>
     </div>
-
     <div class="main-grid">
       <aside>
         <div class="panel-title">⚙️ Configuración LU</div>
         <div class="input-stack">
-          <div class="field">
-            <label>Matriz A (3x3) - Filas ;, columnas ,</label>
-            <textarea id="lu_matrizA">4,2,1;12,10,5;-8,8,7</textarea>
-          </div>
-          <div class="field">
-            <label>Vector b₁ (SLA inicial) - Valores ,</label>
-            <input type="text" id="lu_vectorB1" value="14,46,26" />
-          </div>
-          <div class="field">
-            <label>Vector b₂ (SLA actualizado) - Valores ,</label>
-            <input type="text" id="lu_vectorB2" value="20,62,30" />
-          </div>
+          <div class="field"><label>Matriz A (3x3) - Filas ;, columnas ,</label><textarea id="lu_matrizA">4,2,1;12,10,5;-8,8,7</textarea></div>
+          <div class="field"><label>Vector b₁ (SLA inicial)</label><input type="text" id="lu_vectorB1" value="14,46,26" /></div>
+          <div class="field"><label>Vector b₂ (SLA actualizado)</label><input type="text" id="lu_vectorB2" value="20,62,30" /></div>
           <div class="actions">
             <button class="btn btn-primary" id="lu_btnCalcular">🔢 Calcular Descomposición LU</button>
             <button class="btn btn-secondary" id="lu_btnResolverB1">▶ Resolver con b₁</button>
-            <button class="btn btn-secondary" id="lu_btnResolverB2">▶ Resolver con b₂ (sin recalcular LU)</button>
+            <button class="btn btn-secondary" id="lu_btnResolverB2">▶ Resolver con b₂</button>
             <button class="btn btn-ghost" id="lu_btnReset">Restaurar Valores</button>
           </div>
         </div>
       </aside>
-
       <main id="lu_resultados" class="results-section">
         <div id="lu_seccionLU" class="hidden">
           <div class="panel-title">📊 Descomposición A = LU</div>
           <div class="matrix-display">
-            <div class="matrix-box">
-              <h4>Matriz A (Original)</h4>
-              <div id="lu_matrizA_display" class="matrix-grid"></div>
-            </div>
-            <div class="matrix-box">
-              <h4>Matriz L (Triangular Inferior)</h4>
-              <div id="lu_matrizL_display" class="matrix-grid"></div>
-            </div>
-            <div class="matrix-box">
-              <h4>Matriz U (Triangular Superior)</h4>
-              <div id="lu_matrizU_display" class="matrix-grid"></div>
-            </div>
+            <div class="matrix-box"><h4>Matriz A</h4><div id="lu_matrizA_display" class="matrix-grid"></div></div>
+            <div class="matrix-box"><h4>Matriz L</h4><div id="lu_matrizL_display" class="matrix-grid"></div></div>
+            <div class="matrix-box"><h4>Matriz U</h4><div id="lu_matrizU_display" class="matrix-grid"></div></div>
           </div>
-          <div class="step-box">
-            <h4>📝 Verificación: L × U = A</h4>
-            <div id="lu_verificacionLU"></div>
-          </div>
+          <div class="step-box"><h4>📝 Verificación: L × U = A</h4><div id="lu_verificacionLU"></div></div>
         </div>
-
         <div id="lu_seccionB1" class="hidden">
-          <div class="panel-title">🎯 Solución con b₁ = (14, 46, 26)ᵀ</div>
+          <div class="panel-title">🎯 Solución con b₁</div>
           <div class="comparison-grid">
-            <div class="matrix-box">
-              <h4>Paso 1: Sustitución hacia adelante (Ly = b₁)</h4>
-              <div id="lu_vectorY1" class="vector-display"></div>
-            </div>
-            <div class="matrix-box">
-              <h4>Paso 2: Sustitución hacia atrás (Ux = y)</h4>
-              <div id="lu_vectorX1" class="vector-display"></div>
-            </div>
+            <div class="matrix-box"><h4>Paso 1: Ly = b₁</h4><div id="lu_vectorY1" class="vector-display"></div></div>
+            <div class="matrix-box"><h4>Paso 2: Ux = y</h4><div id="lu_vectorX1" class="vector-display"></div></div>
           </div>
-          <div class="solution-box">
-            <h3>✅ Vector Solución x₁</h3>
-            <div id="lu_solucionX1" class="vector-display"></div>
-          </div>
+          <div class="solution-box"><h3>✅ Vector Solución x₁</h3><div id="lu_solucionX1" class="vector-display"></div></div>
         </div>
-
         <div id="lu_seccionB2" class="hidden">
-          <div class="panel-title">🎯 Solución con b₂ = (20, 62, 30)ᵀ (usando LU ya calculada)</div>
+          <div class="panel-title">🎯 Solución con b₂</div>
           <div class="comparison-grid">
-            <div class="matrix-box">
-              <h4>Paso 1: Sustitución hacia adelante (Ly = b₂)</h4>
-              <div id="lu_vectorY2" class="vector-display"></div>
-            </div>
-            <div class="matrix-box">
-              <h4>Paso 2: Sustitución hacia atrás (Ux = y)</h4>
-              <div id="lu_vectorX2" class="vector-display"></div>
-            </div>
+            <div class="matrix-box"><h4>Paso 1: Ly = b₂</h4><div id="lu_vectorY2" class="vector-display"></div></div>
+            <div class="matrix-box"><h4>Paso 2: Ux = y</h4><div id="lu_vectorX2" class="vector-display"></div></div>
           </div>
-          <div class="solution-box">
-            <h3>✅ Vector Solución x₂</h3>
-            <div id="lu_solucionX2" class="vector-display"></div>
-          </div>
+          <div class="solution-box"><h3>✅ Vector Solución x₂</h3><div id="lu_solucionX2" class="vector-display"></div></div>
         </div>
-
         <div id="lu_seccionAnalisis" class="hidden">
           <div class="panel-title">📈 Análisis de Resultados</div>
-          <div class="step-box">
-            <h4>📡 Interpretación del Balanceo de Carga</h4>
-            <div id="lu_analisisInterpretacion"></div>
-          </div>
-          <div class="step-box">
-            <h4>⚡ Ventaja de la Factorización LU</h4>
-            <div id="lu_analisisVentaja"></div>
-          </div>
+          <div class="step-box"><h4>📡 Interpretación</h4><div id="lu_analisisInterpretacion"></div></div>
+          <div class="step-box"><h4>⚡ Ventaja LU</h4><div id="lu_analisisVentaja"></div></div>
         </div>
       </main>
     </div>
+  </div>
 
-    <!-- ENTREGABLES LU -->
-    <div class="entregables-section">
-      <div class="entregables-title">📋 ENTREGABLES: Factorización LU</div>
-      <div class="entregables-grid">
-        <div class="entregable-card">
-          <h3>1. Desarrollo Matemático (Doolittle)</h3>
-          <div class="formula-box">
-            <div class="comment">// A = L × U (Diagonal de L = 1)</div>
-            <div class="highlight">u[i][j] = a[i][j] - Σ l[i][k]·u[k][j]</div>
-            <div class="highlight">l[i][j] = (a[i][j] - Σ l[i][k]·u[k][j]) / u[j][j]</div>
+  <!-- ==================== INTERPOLACIÓN DE LAGRANGE ==================== -->
+  <div id="lagrange" class="method-panel">
+    <div class="problem-info">
+      <strong>Contexto:</strong> Optimización de latencia en un cluster de microservicios. El consumo de memoria RAM (x, en GB) impacta directamente en la latencia media de respuesta (y, en ms). Se necesita estimar la latencia para x = 6 GB.
+    </div>
+
+    <div class="main-grid">
+      <aside>
+        <div class="panel-title">⚙️ Entrada de Datos</div>
+        <div class="input-stack">
+          <div class="field"><label>Punto 1 - x₀ (GB)</label><input type="number" id="lag_x0" value="2" step="0.1" onchange="lag_actualizarTabla()"></div>
+          <div class="field"><label>Punto 1 - y₀ (ms)</label><input type="number" id="lag_y0" value="150" step="0.1" onchange="lag_actualizarTabla()"></div>
+          
+          <div class="field"><label>Punto 2 - x₁ (GB)</label><input type="number" id="lag_x1" value="4" step="0.1" onchange="lag_actualizarTabla()"></div>
+          <div class="field"><label>Punto 2 - y₁ (ms)</label><input type="number" id="lag_y1" value="85" step="0.1" onchange="lag_actualizarTabla()"></div>
+          
+          <div class="field"><label>Punto 3 - x₂ (GB)</label><input type="number" id="lag_x2" value="8" step="0.1" onchange="lag_actualizarTabla()"></div>
+          <div class="field"><label>Punto 3 - y₂ (ms)</label><input type="number" id="lag_y2" value="50" step="0.1" onchange="lag_actualizarTabla()"></div>
+          
+          <div class="field"><label>Punto 4 - x₃ (GB)</label><input type="number" id="lag_x3" value="12" step="0.1" onchange="lag_actualizarTabla()"></div>
+          <div class="field"><label>Punto 4 - y₃ (ms)</label><input type="number" id="lag_y3" value="70" step="0.1" onchange="lag_actualizarTabla()"></div>
+          
+          <div class="field" style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <label style="color: var(--accent-warning);">🎯 Punto a evaluar x (GB)</label>
+            <input type="number" id="lag_xEval" value="6" step="0.1" style="border-color: var(--accent-warning);">
           </div>
-          <p><strong>Ventaja:</strong> O(n³) una vez, luego O(n²) para cada nuevo vector <strong>b</strong>.</p>
+          
+          <div class="actions">
+            <button class="btn btn-primary" onclick="lag_calcularInterpolacion()">🚀 Calcular Interpolación</button>
+            <button class="btn btn-ghost" onclick="lag_reset()">Restaurar Valores</button>
+          </div>
         </div>
-        <div class="entregable-card">
-          <h3>2. Análisis de Ingeniería</h3>
-          <p>Para un clúster con <strong>n = 1000</strong> microservicios:</p>
-          <ul>
-            <li>LU una vez: ~10⁹ operaciones</li>
-            <li>Cada nuevo b con LU: ~10⁶ operaciones (1000× más rápido)</li>
-            <li>Gaussiana completa: ~10⁹ operaciones por cada b</li>
-          </ul>
-          <p style="margin-top: 1rem;">Esto permite recalcular latencias en tiempo real ante picos de tráfico sin saturar la CPU del balanceador.</p>
+      </aside>
+
+      <main id="lag_resultados" class="results-section hidden">
+        <div class="result-card">
+          <h3>📋 Tabla de Datos Experimentales</h3>
+          <table class="lagrange-data-table">
+            <thead>
+              <tr><th>Punto</th><th>Memoria RAM (GB)</th><th>Latencia Media (ms)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style="color: var(--accent-primary); font-weight: bold;">(x₀, y₀)</td><td id="lag_tableX0" style="color: var(--accent-secondary); font-weight: 600;">2</td><td id="lag_tableY0" style="color: var(--accent-success); font-weight: 600;">150</td></tr>
+              <tr><td style="color: var(--accent-primary); font-weight: bold;">(x₁, y₁)</td><td id="lag_tableX1" style="color: var(--accent-secondary); font-weight: 600;">4</td><td id="lag_tableY1" style="color: var(--accent-success); font-weight: 600;">85</td></tr>
+              <tr><td style="color: var(--accent-primary); font-weight: bold;">(x₂, y₂)</td><td id="lag_tableX2" style="color: var(--accent-secondary); font-weight: 600;">8</td><td id="lag_tableY2" style="color: var(--accent-success); font-weight: 600;">50</td></tr>
+              <tr><td style="color: var(--accent-primary); font-weight: bold;">(x₃, y₃)</td><td id="lag_tableX3" style="color: var(--accent-secondary); font-weight: 600;">12</td><td id="lag_tableY3" style="color: var(--accent-success); font-weight: 600;">70</td></tr>
+            </tbody>
+          </table>
         </div>
-      </div>
+
+        <div class="result-card" style="text-align: center; border-color: var(--accent-success);">
+          <h3>📈 Resultado de la Interpolación</h3>
+          <div class="lagrange-result-value" id="lag_resultado">--</div>
+          <p style="color: var(--text-muted);">Latencia estimada para <strong id="lag_xEvalDisplay" style="color: var(--text-main);">6</strong> GB de RAM</p>
+        </div>
+
+        <div class="result-card">
+          <h3>📝 Polinomio Interpolador P₃(x)</h3>
+          <div id="lag_polinomioLagrange" class="formula-box" style="text-align: center; font-size: 1.1rem; margin-bottom: 1rem;">--</div>
+          
+          <div style="border-top: 1px solid var(--border); padding-top: 1rem;">
+            <h4 style="color: var(--accent-success); margin-bottom: 0.5rem; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+              📊 Forma Estándar: P₃(x) = a₃x³ + a₂x² + a₁x + a₀
+            </h4>
+            <div id="lag_polinomioEstandar" style="font-size: 1.2rem; color: var(--accent-primary); font-weight: 600; text-align: center; margin-bottom: 1rem;">--</div>
+            
+            <div class="coef-grid">
+              <div class="coef-item"><span style="color: var(--text-muted);">a₃ =</span><span id="lag_coef_a3" style="color: var(--accent-primary); font-weight: bold;">--</span></div>
+              <div class="coef-item"><span style="color: var(--text-muted);">a₂ =</span><span id="lag_coef_a2" style="color: var(--accent-primary); font-weight: bold;">--</span></div>
+              <div class="coef-item"><span style="color: var(--text-muted);">a₁ =</span><span id="lag_coef_a1" style="color: var(--accent-primary); font-weight: bold;">--</span></div>
+              <div class="coef-item"><span style="color: var(--text-muted);">a₀ =</span><span id="lag_coef_a0" style="color: var(--accent-primary); font-weight: bold;">--</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-box" id="lag_stepsDisplay" style="display: none;">
+          <h4>🔢 Desarrollo Paso a Paso</h4>
+          <div id="lag_stepsContent"></div>
+        </div>
+
+        <div class="chart-wrapper" style="height: 450px;">
+          <canvas id="lag_lagrangeChart"></canvas>
+        </div>
+      </main>
     </div>
   </div>
 
@@ -823,11 +528,9 @@
   function parseMatrix(texto) {
     return texto.split(';').map(fila => fila.split(',').map(valor => parseFloat(valor.trim())));
   }
-
   function parseVector(texto) {
     return texto.split(',').map(valor => parseFloat(valor.trim()));
   }
-
   function formatearNumero(num) {
     return Number.isInteger(num) ? num.toString() : num.toFixed(6);
   }
@@ -887,7 +590,7 @@
     } catch (e) { setStatus('jac_status', 'Error al parsear la matriz o vectores.', 'error'); return; }
 
     if (!checkDiagonalDominance(A)) {
-      setStatus('jac_status', 'La matriz NO es diagonal dominante estricta. Jacobi puede no converger.', 'error'); return;
+      setStatus('jac_status', 'La matriz NO es diagonal dominante estricta.', 'error'); return;
     }
 
     const n = A.length;
@@ -921,7 +624,6 @@
       setStatus('jac_status', `No convergió en ${maxIter} iteraciones`, 'error');
     }
 
-    // Render Tabla
     let html = '';
     results.forEach((r) => {
       let rowClass = r.converged ? 'convergence-row' : (converged && r.iter > iteracionConvergencia ? 'post-convergence-row' : '');
@@ -932,7 +634,6 @@
     document.getElementById('jac_iterCount').textContent = `[ ${maxIter} ITERACIONES ]`;
     document.getElementById('jac_resultados').classList.remove('hidden');
 
-    // Render Gráficos
     const labels = results.map(r => r.iter);
     const errors = results.map(r => r.error);
     if (jac_errorChart) jac_errorChart.destroy();
@@ -952,7 +653,6 @@
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: '#9ca3af' } } }, scales: { y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }, x: { grid: { display: false }, ticks: { color: '#9ca3af' } } } }
     });
 
-    // Render Conclusión
     const finalX = results[results.length - 1].x;
     const xStr = finalX.map((v, i) => `x${i+1} ≈ ${v.toFixed(4)}`).join('<br>');
     document.getElementById('jac_conclusion').innerHTML = `<h3>📌 Análisis de Resultados</h3>
@@ -975,9 +675,6 @@
 
   document.getElementById('jac_calcularBtn').addEventListener('click', calcularJacobi);
   document.getElementById('jac_resetBtn').addEventListener('click', resetJacobi);
-  document.querySelectorAll('#jacobi input, #jacobi textarea').forEach(inp => {
-    inp.addEventListener('keypress', (e) => { if (e.key === 'Enter') calcularJacobi(); });
-  });
 
 
   // ==================== FACTORIZACIÓN LU ====================
@@ -1015,7 +712,6 @@
     const L = Array.from({length: n}, () => Array(n).fill(0));
     const U = Array.from({length: n}, () => Array(n).fill(0));
     for (let i = 0; i < n; i++) L[i][i] = 1;
-
     for (let i = 0; i < n; i++) {
       for (let j = i; j < n; j++) {
         let suma = 0;
@@ -1105,19 +801,8 @@
       document.getElementById('lu_seccionAnalisis').classList.remove('hidden');
 
       if (numB === 1) {
-        document.getElementById('lu_analisisInterpretacion').innerHTML = `
-          <p>Los tiempos de cómputo óptimos para cada microservicio son:</p>
-          <ul style="margin-left: 20px; margin-top: 10px;">
-            <li><strong>S₁ (Tráfico global):</strong> x₁ = ${formatearNumero(x[0])} ms</li>
-            <li><strong>S₂ (Backend):</strong> x₂ = ${formatearNumero(x[1])} ms</li>
-            <li><strong>S₃ (Base de Datos):</strong> x₃ = ${formatearNumero(x[2])} ms</li>
-          </ul>`;
-        document.getElementById('lu_analisisVentaja').innerHTML = `
-          <ul style="margin-left: 20px; margin-top: 10px;">
-            <li>Descomposición LU: <strong>O(n³)</strong> - Se calcula UNA sola vez</li>
-            <li>Cada nuevo vector b: <strong>O(n²)</strong> - Solo sustituciones</li>
-            <li>Para n = 1000: LU toma ~10⁹ ops, pero cada nuevo b toma solo ~10⁶ ops (1000× más rápido que Gaussiana completa).</li>
-          </ul>`;
+        document.getElementById('lu_analisisInterpretacion').innerHTML = `<p>Los tiempos de cómputo óptimos para cada microservicio son:</p><ul style="margin-left: 20px; margin-top: 10px;"><li><strong>S₁:</strong> x₁ = ${formatearNumero(x[0])} ms</li><li><strong>S₂:</strong> x₂ = ${formatearNumero(x[1])} ms</li><li><strong>S₃:</strong> x₃ = ${formatearNumero(x[2])} ms</li></ul>`;
+        document.getElementById('lu_analisisVentaja').innerHTML = `<ul style="margin-left: 20px; margin-top: 10px;"><li>Descomposición LU: <strong>O(n³)</strong> - Se calcula UNA sola vez</li><li>Cada nuevo vector b: <strong>O(n²)</strong> - Solo sustituciones</li></ul>`;
       }
     } catch (error) {
       alert('Error al resolver el sistema: ' + error.message);
@@ -1137,11 +822,231 @@
   document.getElementById('lu_btnResolverB2').addEventListener('click', () => lu_resolverSistema(parseVector(document.getElementById('lu_vectorB2').value), 2));
   document.getElementById('lu_btnReset').addEventListener('click', lu_reset);
 
+
+  // ==================== INTERPOLACIÓN DE LAGRANGE ====================
+  let lag_chart = null;
+
+  function lag_actualizarTabla() {
+    document.getElementById('lag_tableX0').textContent = document.getElementById('lag_x0').value;
+    document.getElementById('lag_tableY0').textContent = document.getElementById('lag_y0').value;
+    document.getElementById('lag_tableX1').textContent = document.getElementById('lag_x1').value;
+    document.getElementById('lag_tableY1').textContent = document.getElementById('lag_y1').value;
+    document.getElementById('lag_tableX2').textContent = document.getElementById('lag_x2').value;
+    document.getElementById('lag_tableY2').textContent = document.getElementById('lag_y2').value;
+    document.getElementById('lag_tableX3').textContent = document.getElementById('lag_x3').value;
+    document.getElementById('lag_tableY3').textContent = document.getElementById('lag_y3').value;
+  }
+
+  function lag_calcularLagrange(x, x0, x1, x2, x3, y0, y1, y2, y3) {
+    const L0 = ((x - x1) * (x - x2) * (x - x3)) / ((x0 - x1) * (x0 - x2) * (x0 - x3));
+    const L1 = ((x - x0) * (x - x2) * (x - x3)) / ((x1 - x0) * (x1 - x2) * (x1 - x3));
+    const L2 = ((x - x0) * (x - x1) * (x - x3)) / ((x2 - x0) * (x2 - x1) * (x2 - x3));
+    const L3 = ((x - x0) * (x - x1) * (x - x2)) / ((x3 - x0) * (x3 - x1) * (x3 - x2));
+    
+    const P = y0 * L0 + y1 * L1 + y2 * L2 + y3 * L3;
+    
+    return { L0, L1, L2, L3, P, terminos: { t0: y0 * L0, t1: y1 * L1, t2: y2 * L2, t3: y3 * L3 } };
+  }
+
+  function lag_calcularCoeficientes(x0, x1, x2, x3, y0, y1, y2, y3) {
+    const den0 = (x0 - x1) * (x0 - x2) * (x0 - x3);
+    const den1 = (x1 - x0) * (x1 - x2) * (x1 - x3);
+    const den2 = (x2 - x0) * (x2 - x1) * (x2 - x3);
+    const den3 = (x3 - x0) * (x3 - x1) * (x3 - x2);
+    
+    const num0 = { x3: 1, x2: -(x1 + x2 + x3), x1: (x1*x2 + x1*x3 + x2*x3), x0: -(x1*x2*x3) };
+    const num1 = { x3: 1, x2: -(x0 + x2 + x3), x1: (x0*x2 + x0*x3 + x2*x3), x0: -(x0*x2*x3) };
+    const num2 = { x3: 1, x2: -(x0 + x1 + x3), x1: (x0*x1 + x0*x3 + x1*x3), x0: -(x0*x1*x3) };
+    const num3 = { x3: 1, x2: -(x0 + x1 + x2), x1: (x0*x1 + x0*x2 + x1*x2), x0: -(x0*x1*x2) };
+    
+    const a3 = (y0 * num0.x3) / den0 + (y1 * num1.x3) / den1 + (y2 * num2.x3) / den2 + (y3 * num3.x3) / den3;
+    const a2 = (y0 * num0.x2) / den0 + (y1 * num1.x2) / den1 + (y2 * num2.x2) / den2 + (y3 * num3.x2) / den3;
+    const a1 = (y0 * num0.x1) / den0 + (y1 * num1.x1) / den1 + (y2 * num2.x1) / den2 + (y3 * num3.x1) / den3;
+    const a0 = (y0 * num0.x0) / den0 + (y1 * num1.x0) / den1 + (y2 * num2.x0) / den2 + (y3 * num3.x0) / den3;
+    
+    return { a3, a2, a1, a0 };
+  }
+
+  function lag_formatearPolinomioEstandar(coef) {
+    const { a3, a2, a1, a0 } = coef;
+    let resultado = 'P₃(x) = ';
+    
+    if (Math.abs(a3) > 1e-10) resultado += `${a3.toFixed(6)}x³ `;
+    if (Math.abs(a2) > 1e-10) {
+      if (a2 >= 0 && resultado !== 'P₃(x) = ') resultado += '+ ';
+      resultado += `${a2.toFixed(6)}x² `;
+    }
+    if (Math.abs(a1) > 1e-10) {
+      if (a1 >= 0 && resultado !== 'P₃(x) = ') resultado += '+ ';
+      resultado += `${a1.toFixed(6)}x `;
+    }
+    if (Math.abs(a0) > 1e-10) {
+      if (a0 >= 0 && resultado !== 'P₃(x) = ') resultado += '+ ';
+      resultado += `${a0.toFixed(6)}`;
+    }
+    return resultado;
+  }
+
+  function lag_generarPolinomio(x0, x1, x2, x3, y0, y1, y2, y3) {
+    const h = 0.01;
+    const puntos = [];
+    const minX = Math.min(x0, x1, x2, x3);
+    const maxX = Math.max(x0, x1, x2, x3);
+    for (let x = minX; x <= maxX; x += h) {
+      const resultado = lag_calcularLagrange(x, x0, x1, x2, x3, y0, y1, y2, y3);
+      puntos.push({x, y: resultado.P});
+    }
+    return puntos;
+  }
+
+  function lag_calcularInterpolacion() {
+    lag_actualizarTabla();
+    
+    const x0 = parseFloat(document.getElementById('lag_x0').value);
+    const y0 = parseFloat(document.getElementById('lag_y0').value);
+    const x1 = parseFloat(document.getElementById('lag_x1').value);
+    const y1 = parseFloat(document.getElementById('lag_y1').value);
+    const x2 = parseFloat(document.getElementById('lag_x2').value);
+    const y2 = parseFloat(document.getElementById('lag_y2').value);
+    const x3 = parseFloat(document.getElementById('lag_x3').value);
+    const y3 = parseFloat(document.getElementById('lag_y3').value);
+    const xEval = parseFloat(document.getElementById('lag_xEval').value);
+    
+    const resultado = lag_calcularLagrange(xEval, x0, x1, x2, x3, y0, y1, y2, y3);
+    const coeficientes = lag_calcularCoeficientes(x0, x1, x2, x3, y0, y1, y2, y3);
+    
+    document.getElementById('lag_resultado').textContent = `${resultado.P.toFixed(4)} ms`;
+    document.getElementById('lag_xEvalDisplay').textContent = xEval;
+    
+    document.getElementById('lag_polinomioLagrange').innerHTML = `
+      <strong style="color: var(--accent-secondary);">Forma de Lagrange:</strong><br>
+      P₃(x) = ${y0}·L₀(x) + ${y1}·L₁(x) + ${y2}·L₂(x) + ${y3}·L₃(x)
+    `;
+    
+    document.getElementById('lag_polinomioEstandar').textContent = lag_formatearPolinomioEstandar(coeficientes);
+    document.getElementById('lag_coef_a3').textContent = coeficientes.a3.toFixed(6);
+    document.getElementById('lag_coef_a2').textContent = coeficientes.a2.toFixed(6);
+    document.getElementById('lag_coef_a1').textContent = coeficientes.a1.toFixed(6);
+    document.getElementById('lag_coef_a0').textContent = coeficientes.a0.toFixed(6);
+    
+    const stepsContent = `
+      <div class="lagrange-step"><strong>Paso 1: Calcular L₀(${xEval})</strong><div class="lagrange-formula">L₀(${xEval}) = [(${xEval}-${x1})(${xEval}-${x2})(${xEval}-${x3})] / [(${x0}-${x1})(${x0}-${x2})(${x0}-${x3})]<br>= ${resultado.L0.toFixed(6)}</div></div>
+      <div class="lagrange-step"><strong>Paso 2: Calcular L₁(${xEval})</strong><div class="lagrange-formula">L₁(${xEval}) = [(${xEval}-${x0})(${xEval}-${x2})(${xEval}-${x3})] / [(${x1}-${x0})(${x1}-${x2})(${x1}-${x3})]<br>= ${resultado.L1.toFixed(6)}</div></div>
+      <div class="lagrange-step"><strong>Paso 3: Calcular L₂(${xEval})</strong><div class="lagrange-formula">L₂(${xEval}) = [(${xEval}-${x0})(${xEval}-${x1})(${xEval}-${x3})] / [(${x2}-${x0})(${x2}-${x1})(${x2}-${x3})]<br>= ${resultado.L2.toFixed(6)}</div></div>
+      <div class="lagrange-step"><strong>Paso 4: Calcular L₃(${xEval})</strong><div class="lagrange-formula">L₃(${xEval}) = [(${xEval}-${x0})(${xEval}-${x1})(${xEval}-${x2})] / [(${x3}-${x0})(${x3}-${x1})(${x3}-${x2})]<br>= ${resultado.L3.toFixed(6)}</div></div>
+      <div class="lagrange-step"><strong>Paso 5: Calcular P(${xEval})</strong><div class="lagrange-formula">P(${xEval}) = ${y0}·${resultado.L0.toFixed(6)} + ${y1}·${resultado.L1.toFixed(6)} + ${y2}·${resultado.L2.toFixed(6)} + ${y3}·${resultado.L3.toFixed(6)}<br>= ${resultado.terminos.t0.toFixed(4)} + ${resultado.terminos.t1.toFixed(4)} + ${resultado.terminos.t2.toFixed(4)} + ${resultado.terminos.t3.toFixed(4)}<br>= <strong style="color: var(--accent-success);">${resultado.P.toFixed(4)} ms</strong></div></div>
+    `;
+    
+    document.getElementById('lag_stepsContent').innerHTML = stepsContent;
+    document.getElementById('lag_stepsDisplay').style.display = 'block';
+    document.getElementById('lag_resultados').classList.remove('hidden');
+    
+    lag_generarGrafica(x0, x1, x2, x3, y0, y1, y2, y3, xEval, resultado.P);
+  }
+
+  function lag_generarGrafica(x0, x1, x2, x3, y0, y1, y2, y3, xEval, yEval) {
+    const minX = Math.min(x0, x1, x2, x3) - 1;
+    const maxX = Math.max(x0, x1, x2, x3) + 1;
+    const puntosPolinomio = lag_generarPolinomio(x0, x1, x2, x3, y0, y1, y2, y3);
+    
+    const datosGrafica = {
+      datasets: [
+        {
+          label: 'P₃(x) - Polinomio de Lagrange',
+          data: puntosPolinomio.map(p => ({x: p.x, y: p.y})),
+          borderColor: '#06b6d4',
+          backgroundColor: 'rgba(6, 182, 212, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          order: 2
+        },
+        {
+          label: 'Puntos Experimentales',
+          data: [{x: x0, y: y0}, {x: x1, y: y1}, {x: x2, y: y2}, {x: x3, y: y3}],
+          borderColor: '#f59e0b',
+          backgroundColor: ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'],
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointBorderColor: '#f3f4f6',
+          pointBorderWidth: 2,
+          pointRadius: 8,
+          pointHoverRadius: 10,
+          showLine: true,
+          tension: 0,
+          order: 1
+        },
+        {
+          label: `Punto Evaluado (${xEval}, ${yEval.toFixed(2)})`,
+          data: [{x: xEval, y: yEval}],
+          backgroundColor: '#ef4444',
+          borderColor: '#f3f4f6',
+          borderWidth: 3,
+          pointRadius: 12,
+          pointHoverRadius: 15,
+          showLine: false,
+          order: 0
+        }
+      ]
+    };
+    
+    const config = {
+      type: 'line',
+      data: datosGrafica,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+          legend: { display: true, labels: { color: '#9ca3af' } },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `${context.dataset.label}: (${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)} ms)`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            title: { display: true, text: 'Memoria RAM (GB)', color: '#9ca3af', font: { weight: 'bold' } },
+            min: minX, max: maxX,
+            grid: { color: '#374151' },
+            ticks: { color: '#9ca3af' }
+          },
+          y: {
+            title: { display: true, text: 'Latencia (ms)', color: '#9ca3af', font: { weight: 'bold' } },
+            grid: { color: '#374151' },
+            ticks: { color: '#9ca3af' }
+          }
+        }
+      }
+    };
+    
+    if (lag_chart) lag_chart.destroy();
+    lag_chart = new Chart(document.getElementById('lag_lagrangeChart').getContext('2d'), config);
+  }
+
+  function lag_reset() {
+    document.getElementById('lag_x0').value = '2'; document.getElementById('lag_y0').value = '150';
+    document.getElementById('lag_x1').value = '4'; document.getElementById('lag_y1').value = '85';
+    document.getElementById('lag_x2').value = '8'; document.getElementById('lag_y2').value = '50';
+    document.getElementById('lag_x3').value = '12'; document.getElementById('lag_y3').value = '70';
+    document.getElementById('lag_xEval').value = '6';
+    lag_actualizarTabla();
+    document.getElementById('lag_resultados').classList.add('hidden');
+    document.getElementById('lag_stepsDisplay').style.display = 'none';
+    if (lag_chart) { lag_chart.destroy(); lag_chart = null; }
+  }
+
   // Inicializar
   window.onload = function() {
     resetJacobi();
     lu_calcular();
     lu_resolverSistema(parseVector(document.getElementById('lu_vectorB1').value), 1);
+    lag_actualizarTabla();
   };
 </script>
 
